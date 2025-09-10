@@ -3,6 +3,8 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 import launch
+from launch_ros.actions import PushRosNamespace
+import launch_ros.actions
 
 ################### user configure parameters for ros2 start ###################
 xfer_format   = 0    # 0-Pointcloud2(PointXYZRTL), 1-customized pointcloud format
@@ -48,10 +50,25 @@ def generate_launch_description():
             output='screen',
             arguments=['--display-config', rviz_config_path]
         )
+    
+    base_to_link = launch_ros.actions.Node(
+            package='tf2_ros', 
+            executable='static_transform_publisher', 
+            name='base_to_link',
+            arguments=['0', '0', '0','0', '0','0','base_footprint','base_link'],
+    )
+    base_to_lidar= launch_ros.actions.Node(
+            package='tf2_ros', 
+            executable='static_transform_publisher', 
+            name='base_to_lidar',
+            arguments=['0', '0', '0','0', '0','0','base_footprint','livox_frame'],
+    )
 
     return LaunchDescription([
         livox_driver,
         livox_rviz,
+        base_to_link,
+        base_to_lidar,
         # launch.actions.RegisterEventHandler(
         #     event_handler=launch.event_handlers.OnProcessExit(
         #         target_action=livox_rviz,
