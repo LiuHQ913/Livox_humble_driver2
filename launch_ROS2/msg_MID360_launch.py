@@ -4,13 +4,16 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 import launch
 
+from launch_ros.actions import PushRosNamespace
+import launch_ros.actions
+
 ################### user configure parameters for ros2 start ###################
 xfer_format   = 1    # 0-Pointcloud2(PointXYZRTL), 1-customized pointcloud format
 multi_topic   = 0    # 0-All LiDARs share the same topic, 1-One LiDAR one topic
 data_src      = 0    # 0-lidar, others-Invalid data src
 publish_freq  = 10.0 # freqency of publish, 5.0, 10.0, 20.0, 50.0, etc.
 output_type   = 0
-frame_id      = 'livox_frame'
+frame_id      = 'base_link'
 lvx_file_path = '/home/livox/livox_test.lvx'
 cmdline_bd_code = 'livox0000000001'
 
@@ -40,6 +43,13 @@ def generate_launch_description():
         output='screen',
         parameters=livox_ros2_params
         )
+    
+    base_to_link = launch_ros.actions.Node(
+            package='tf2_ros', 
+            executable='static_transform_publisher', 
+            name='base_to_link',
+            arguments=['0', '0', '0','0', '0','0','base_footprint','base_link'],
+    )
 
     return LaunchDescription([
         livox_driver,
